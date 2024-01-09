@@ -74,8 +74,8 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-    var error = /*[[${error}]]*/ 'default';
-    if (error !== 'default') {
+    var error = /*[[${error}]]*/ '';
+    if (error) {
         document.getElementById('error-message').textContent = error;
         document.getElementById('error-popup').style.display = 'block';
     }
