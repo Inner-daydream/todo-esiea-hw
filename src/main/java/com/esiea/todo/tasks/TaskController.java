@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 @Controller
 @Validated
@@ -60,9 +61,9 @@ public class TaskController {
     }
 
     @RequestMapping(value = "/tasks", method = RequestMethod.PUT)
-    public String editTask(@RequestParam @NotEmpty Long id, @RequestParam @NotEmpty String title,
+    public String editTask(@RequestParam @NotNull Long id, @RequestParam @NotEmpty String title,
             @RequestParam @NotEmpty String description,
-            @RequestParam @NotEmpty Status status, @NotEmpty @RequestParam String dueDate,
+            @RequestParam @NotNull Status status, @NotEmpty @RequestParam String dueDate,
             RedirectAttributes redirectAttributes) {
 
         try {
