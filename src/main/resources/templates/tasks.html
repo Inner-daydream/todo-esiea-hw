@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Todo List</title>
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+    <script type="text/javascript" src="/edit.js"></script>
+
+</head>
+
+<body>
+    <h1>Todo List</h1>
+
+    <p th:if="${error}" style="color: red;">${error}</p>
+
+    <form th:action="@{/tasks}" method="post">
+        <input type="text" name="title" placeholder="Enter task title" required>
+        <input type="date" name="dueDate" placeholder="Enter task due date" required>
+        <input type="text" name="description" placeholder="Enter task description" required>
+        <button type="submit">Add Task</button>
+    </form>
+
+
+    <div id="popup" class="popup">
+        <form th:action="@{/tasks}" method="post">
+            <input type="hidden" name="_method" value="PUT">
+            <input type="text" name="title" placeholder="Enter task title" required>
+            <input type="date" name="dueDate" placeholder="Enter task due date" required>
+            <input type="text" name="description" placeholder="Enter task description" required>
+            <select name="status" required>
+                <option value="OPEN">Open</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="DONE">Done</option>
+            </select>
+            <input type="hidden" name="id">
+            <button type="submit">Save</button>
+            <button onclick="hidePopup()">Cancel</button>
+        </form>
+    </div>
+
+    <thead>
+        <tr>
+            <th>Status</th>
+            <th>Due Date</th>
+            <th>Description</th>
+            <th>Title</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <table class="task-list">
+        <tbody>
+            <tr th:each="task : ${tasks}">
+                <td th:text="${task.status}"></td>
+                <td th:text="${#dates.format(task.dueDate, 'yyyy-MM-dd')}"></td>
+                <td th:text="${task.description}"></td>
+                <td th:text="${task.title}"></td>
+                <td>
+                    <a href="#"
+                        th:attr="data-title=${task.title},data-dueDate=${#dates.format(task.dueDate, 'yyyy-MM-dd')},data-description=${task.description},data-id=${task.id},data-status=${task.status}"
+                        onclick="showPopup(event)">Edit</a>
+                    <form th:action="@{/tasks/{id}(id=${task.id})}" method="post">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="submit" value="Delete">
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
