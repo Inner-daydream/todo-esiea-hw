@@ -15,9 +15,7 @@ public class TaskService {
 
     public Task createTask(String title, String description, Date dueDate) {
         Task task = new Task(title, description, dueDate);
-        Task saved = taskRepository.save(task);
-        System.out.println("saved: " + saved.getDueDate());
-        return saved;
+        return taskRepository.save(task);
     }
 
     public Task getTaskById(Long id) {
