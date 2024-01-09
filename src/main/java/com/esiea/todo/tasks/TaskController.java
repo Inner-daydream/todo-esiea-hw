@@ -28,13 +28,15 @@ public class TaskController {
         this.taskService = taskService;
     }
 
+    // Provides a default error message to the view when the validation fails via
+    // the annotation (eg. @NotEmpty, @NotNull)
     @ExceptionHandler(ConstraintViolationException.class)
     public String handleConstraintViolationException(ConstraintViolationException e,
             RedirectAttributes redirectAttributes) {
         String errorMessage = e.getConstraintViolations().stream()
                 .map(violation -> violation.getPropertyPath().toString().replaceAll(".*\\.", ""))
                 .collect(Collectors.joining(", "));
-        errorMessage += " must not be empty";
+        errorMessage += " must not be missing";
         redirectAttributes.addFlashAttribute("error", "Invalid request: " + errorMessage);
         return "redirect:/tasks";
     }
