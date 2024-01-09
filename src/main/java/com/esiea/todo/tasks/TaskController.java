@@ -1,15 +1,23 @@
 package com.esiea.todo.tasks;
 
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.constraints.NotEmpty;
+
 @Controller
+@Validated
 public class TaskController {
 
     @Autowired
@@ -17,6 +25,17 @@ public class TaskController {
 
     public TaskController(TaskService taskService) {
         this.taskService = taskService;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public String handleConstraintViolationException(ConstraintViolationException e,
+            RedirectAttributes redirectAttributes) {
+        String errorMessage = e.getConstraintViolations().stream()
+                .map(violation -> violation.getPropertyPath().toString().replaceAll(".*\\.", ""))
+                .collect(Collectors.joining(", "));
+        errorMessage += " must not be empty";
+        redirectAttributes.addFlashAttribute("error", "Invalid request: " + errorMessage);
+        return "redirect:/tasks";
     }
 
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
@@ -27,9 +46,9 @@ public class TaskController {
     }
 
     @RequestMapping(value = "/tasks", method = RequestMethod.POST)
-    public String addTask(Model model, RedirectAttributes redirectAttributes, @RequestParam String title,
-            @RequestParam String description,
-            @RequestParam String dueDate) {
+    public String addTask(Model model, RedirectAttributes redirectAttributes, @RequestParam @NotEmpty String title,
+            @RequestParam @NotEmpty String description,
+            @RequestParam @NotEmpty String dueDate) {
         try {
             taskService.createTask(title, description, dueDate);
 
@@ -41,8 +60,10 @@ public class TaskController {
     }
 
     @RequestMapping(value = "/tasks", method = RequestMethod.PUT)
-    public String editTask(@RequestParam Long id, @RequestParam String title, @RequestParam String description,
-            @RequestParam Status status, @RequestParam String dueDate, RedirectAttributes redirectAttributes) {
+    public String editTask(@RequestParam @NotEmpty Long id, @RequestParam @NotEmpty String title,
+            @RequestParam @NotEmpty String description,
+            @RequestParam @NotEmpty Status status, @NotEmpty @RequestParam String dueDate,
+            RedirectAttributes redirectAttributes) {
 
         try {
             taskService.updateTask(id, title, description, status, dueDate);

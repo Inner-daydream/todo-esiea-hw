@@ -12,7 +12,10 @@
 <body>
     <h1>Todo List</h1>
 
-    <p th:if="${error}" style="color: red;">${error}</p>
+    <div id="error-popup" class="popup" style="display: none;">
+        <p id="error-message"></p>
+        <button onclick="document.getElementById('error-popup').style.display='none'">Close</button>
+    </div>
 
     <form th:action="@{/tasks}" method="post">
         <input type="text" name="title" placeholder="Enter task title" required>
@@ -67,3 +70,14 @@
             </tr>
         </tbody>
     </table>
+</body>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var error = /*[[${error}]]*/ 'default';
+    if (error !== 'default') {
+        document.getElementById('error-message').textContent = error;
+        document.getElementById('error-popup').style.display = 'block';
+    }
+    /*]]>*/
+</script>
