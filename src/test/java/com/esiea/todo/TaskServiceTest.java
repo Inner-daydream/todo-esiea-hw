@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
@@ -14,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.esiea.todo.tasks.InvalidDateException;
 import com.esiea.todo.tasks.Status;
 import com.esiea.todo.tasks.Task;
 import com.esiea.todo.tasks.TaskNotFoundException;
@@ -34,12 +37,21 @@ public class TaskServiceTest {
     }
 
     @Test
+    public void testInvalidDate() {
+        assertThrows(InvalidDateException.class, () -> taskService.createTask("title", "description", "invalidDate"));
+        assertThrows(InvalidDateException.class,
+                () -> taskService.updateTask(1L, "title", "description", Status.OPEN, "invalidDate"));
+    }
+
+    @Test
     public void testCreateTask() {
         Date date = new Date();
+        Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = formatter.format(date);
         Task task = new Task("title", "description", date);
         when(taskRepository.save(any(Task.class))).thenReturn(task);
 
-        Task result = taskService.createTask("title", "description", new Date());
+        Task result = taskService.createTask("title", "description", formattedDate);
 
         assertNotNull(result);
         assertEquals("title", result.getTitle());
@@ -89,6 +101,8 @@ public class TaskServiceTest {
         Long taskId = 1L;
         Date date = new Date();
         Date modifiedDate = new Date();
+        Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String modifiedFormattedDate = formatter.format(modifiedDate);
         String modifiedTitle = "modifiedTitle";
         String modifiedDescription = "modifiedDescription";
         Task task = new Task("title", "description", date);
@@ -97,7 +111,8 @@ public class TaskServiceTest {
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
         when(taskRepository.save(any(Task.class))).thenReturn(modifiedTask);
 
-        Task result = taskService.updateTask(taskId, modifiedTitle, modifiedDescription, Status.OPEN, modifiedDate);
+        Task result = taskService.updateTask(taskId, modifiedTitle, modifiedDescription, Status.OPEN,
+                modifiedFormattedDate);
 
         assertNotNull(result);
         assertEquals(modifiedTitle, result.getTitle());
