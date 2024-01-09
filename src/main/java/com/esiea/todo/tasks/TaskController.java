@@ -1,8 +1,5 @@
 package com.esiea.todo.tasks;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,7 +21,8 @@ public class TaskController {
 
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
     public String tasks(Model model) {
-        model.addAttribute("tasks", taskService.getAllTasks());
+        Iterable<Task> tasks = taskService.getAllTasks();
+        model.addAttribute("tasks", tasks);
         return "tasks";
     }
 
@@ -32,32 +30,27 @@ public class TaskController {
     public String addTask(Model model, RedirectAttributes redirectAttributes, @RequestParam String title,
             @RequestParam String description,
             @RequestParam String dueDate) {
-        Date parsedDate = null;
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         try {
-            parsedDate = format.parse(dueDate);
-        } catch (Exception e) {
+            taskService.createTask(title, description, dueDate);
+
+        } catch (InvalidDateException e) {
             redirectAttributes.addFlashAttribute("error", "Invalid date format");
             return "redirect:/tasks";
         }
-        System.out.println("dueDate: " + dueDate);
-        taskService.createTask(title, description, parsedDate);
         return "redirect:/tasks";
     }
 
     @RequestMapping(value = "/tasks", method = RequestMethod.PUT)
     public String editTask(@RequestParam Long id, @RequestParam String title, @RequestParam String description,
             @RequestParam Status status, @RequestParam String dueDate, RedirectAttributes redirectAttributes) {
-        Date parsedDate = null;
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
         try {
-            parsedDate = format.parse(dueDate);
-        } catch (Exception e) {
+            taskService.updateTask(id, title, description, status, dueDate);
+
+        } catch (InvalidDateException e) {
             redirectAttributes.addFlashAttribute("error", "Invalid date format");
             return "redirect:/tasks";
-        }
-        try {
-            taskService.updateTask(id, title, description, status, parsedDate);
+
         } catch (TaskNotFoundException e) {
             redirectAttributes.addFlashAttribute("error", "Task not found");
             return "redirect:/tasks";
