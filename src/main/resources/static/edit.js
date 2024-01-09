@@ -7,9 +7,6 @@ function showPopup(event) {
     var description = link.dataset.description;
     var status = link.dataset.status;
     var id = link.dataset.id;
-    console.log(id, dueDate, "debug")
-    console.log(link.dataset, "debug2")
-    console.log(link.getAttribute('data-dueDate'), "debug3")
     document.querySelector('#popup input[name="title"]').value = title;
     document.querySelector('#popup input[name="dueDate"]').value = dueDate;
     document.querySelector('#popup input[name="description"]').value = description;
