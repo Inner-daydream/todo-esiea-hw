@@ -1,19 +1,19 @@
 package com.esiea.todo.tasks;
 
-import java.lang.annotation.*;
-
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import java.lang.annotation.*;
 
 @Documented
-@Constraint(validatedBy = StatusValidator.class)
+@Constraint(validatedBy = EnumValidator.class)
 @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidStatus {
-
-    String message() default "Invalid status";
+public @interface ValidEnum {
+    String message() default "Invalid value. This is not permitted.";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
+
+    Class<? extends Enum<?>> enumClass();
 }
