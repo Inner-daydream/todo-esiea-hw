@@ -27,19 +27,8 @@ public class Task {
         this.status = Status.OPEN;
     }
 
-    public Task(String title, String description, Status status, Date dueDate) {
-        this.title = title;
-        this.description = description;
-        this.status = status;
-        this.dueDate = dueDate;
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getTitle() {
@@ -72,17 +61,6 @@ public class Task {
 
     public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof Task))
-            return false;
-        Task task = (Task) o;
-        return id.equals(task.id) && title.equals(task.title) && description.equals(task.description)
-                && status == task.status && dueDate.equals(task.dueDate);
     }
 
 }
