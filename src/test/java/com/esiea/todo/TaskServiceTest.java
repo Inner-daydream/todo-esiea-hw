@@ -139,6 +139,20 @@ public class TaskServiceTest {
 
         assertNotNull(result);
         assertTrue(result.iterator().hasNext());
+
     }
 
+    @Test
+    public void testUpdateNonExistingTask() {
+        Long taskId = 1L;
+        String date = "2023-01-01";
+        String title = "title";
+        String description = "description";
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.empty());
+
+        assertThrows(TaskNotFoundException.class, () -> taskService.updateTask(taskId, title, description, Status.OPEN,
+                date.toString()));
+
+    }
 }

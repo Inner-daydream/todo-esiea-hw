@@ -12,6 +12,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.esiea.todo.tasks.InvalidDateException;
 import com.esiea.todo.tasks.Status;
 import com.esiea.todo.tasks.Task;
+import com.esiea.todo.tasks.TaskNotFoundException;
 import com.esiea.todo.tasks.TaskService;
 import java.util.Collections;
 import java.util.Date;
@@ -19,6 +20,7 @@ import java.util.Date;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -203,4 +205,34 @@ public class TaskControllerTest {
                                 .andExpect(flash().attributeExists("error"));
         }
 
+        @Test
+        void testDeleteTaskNotFound() throws Exception {
+                Long id = 1L;
+                doThrow(new TaskNotFoundException(id)).when(taskService).deleteTask(any(Long.class));
+
+                mockMvc.perform(delete("/tasks/" + id))
+                                .andExpect(status().is3xxRedirection())
+                                .andExpect(redirectedUrl("/tasks"))
+                                .andExpect(flash().attributeExists("error"));
+        }
+
+        @Test
+        void testEditTaskNotFound() throws Exception {
+                Long id = 1L;
+                String title = "title";
+                String description = "description";
+                String dueDate = "2022-12-31";
+                when(taskService.updateTask(any(Long.class), anyString(), anyString(), any(Status.class), anyString()))
+                                .thenThrow(new TaskNotFoundException(id));
+
+                mockMvc.perform(put("/tasks")
+                                .param("id", id.toString())
+                                .param("title", title)
+                                .param("description", description)
+                                .param("status", Status.IN_PROGRESS.toString())
+                                .param("dueDate", dueDate))
+                                .andExpect(status().is3xxRedirection())
+                                .andExpect(redirectedUrl("/tasks"))
+                                .andExpect(flash().attributeExists("error"));
+        }
 }
