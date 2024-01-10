@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
@@ -63,18 +65,19 @@ public class TaskController {
     }
 
     @RequestMapping(value = "/tasks", method = RequestMethod.PUT)
-    public String editTask(@RequestParam @NotNull Long id, @RequestParam @NotEmpty String title,
-            @RequestParam @NotEmpty String description,
-            @RequestParam @NotNull Status status, @NotEmpty @RequestParam String dueDate,
+    public String editTask(@Valid TaskEditForm taskForm, BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
+        // if (bindingResult.hasErrors()) {
+        // redirectAttributes.addFlashAttribute("error", "Invalid request");
+        // return "redirect:/tasks";
+        // }
 
         try {
-            taskService.updateTask(id, title, description, status, dueDate);
-
+            taskService.updateTask(taskForm.getId(), taskForm.getTitle(), taskForm.getDescription(),
+                    taskForm.getStatus(), taskForm.getDueDate());
         } catch (InvalidDateException e) {
             redirectAttributes.addFlashAttribute("error", "Invalid date format");
             return "redirect:/tasks";
-
         } catch (TaskNotFoundException e) {
             redirectAttributes.addFlashAttribute("error", "Task not found");
             return "redirect:/tasks";
