@@ -65,16 +65,14 @@ public class TaskController {
     }
 
     @RequestMapping(value = "/tasks", method = RequestMethod.PUT)
-    public String editTask(@Valid TaskEditForm taskForm, BindingResult bindingResult,
+    public String editTask(@RequestParam @NotNull Long id, @RequestParam @NotEmpty String title,
+            @RequestParam @NotEmpty String description,
+            @RequestParam @ValidStatus String status, @NotEmpty @RequestParam String dueDate,
             RedirectAttributes redirectAttributes) {
-        // if (bindingResult.hasErrors()) {
-        // redirectAttributes.addFlashAttribute("error", "Invalid request");
-        // return "redirect:/tasks";
-        // }
 
         try {
-            taskService.updateTask(taskForm.getId(), taskForm.getTitle(), taskForm.getDescription(),
-                    taskForm.getStatus(), taskForm.getDueDate());
+            Status taskStatus = Status.valueOf(status);
+            taskService.updateTask(id, title, description, taskStatus, dueDate);
         } catch (InvalidDateException e) {
             redirectAttributes.addFlashAttribute("error", "Invalid date format");
             return "redirect:/tasks";
