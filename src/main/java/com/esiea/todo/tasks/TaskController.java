@@ -42,14 +42,24 @@ public class TaskController {
     }
 
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
-    public String tasks(Model model, @RequestParam(required = false) @ValidStatus String status) {
+    public String tasks(Model model,
+            @RequestParam(required = false) @ValidEnum(enumClass = Status.class) String status,
+            @RequestParam(required = false) boolean sorted) {
         Iterable<Task> tasks;
 
         if (status != null) {
-            Status taskStatus = Status.valueOf(status);
-            tasks = taskService.getTasksByStatus(taskStatus);
+
+            if (sorted) {
+                tasks = taskService.getTasksByStatusAndPriorityDesc(Status.valueOf(status));
+            } else {
+                tasks = taskService.getTasksByStatus(Status.valueOf(status));
+            }
         } else {
-            tasks = taskService.getAllTasks();
+            if (sorted) {
+                tasks = taskService.getAllTasksSortedByPriorityDesc();
+            } else {
+                tasks = taskService.getAllTasks();
+            }
         }
         model.addAttribute("tasks", tasks);
         return "tasks";
@@ -58,9 +68,12 @@ public class TaskController {
     @RequestMapping(value = "/tasks", method = RequestMethod.POST)
     public String addTask(Model model, RedirectAttributes redirectAttributes, @RequestParam @NotEmpty String title,
             @RequestParam @NotEmpty String description,
-            @RequestParam @NotEmpty String dueDate) {
+            @RequestParam @NotEmpty String dueDate,
+            @RequestParam @NotNull @ValidEnum(enumClass = Priority.class) String priority) {
+
+        Priority taskPriority = Priority.valueOf(priority);
         try {
-            taskService.createTask(title, description, dueDate);
+            taskService.createTask(title, description, dueDate, taskPriority);
 
         } catch (InvalidDateException e) {
             redirectAttributes.addFlashAttribute("error", "Invalid date format");
@@ -72,12 +85,13 @@ public class TaskController {
     @RequestMapping(value = "/tasks", method = RequestMethod.PUT)
     public String editTask(@RequestParam @NotNull Long id, @RequestParam @NotEmpty String title,
             @RequestParam @NotEmpty String description,
-            @RequestParam @NotNull @ValidStatus String status, @NotEmpty @RequestParam String dueDate,
+            @RequestParam @NotNull @ValidEnum(enumClass = Status.class) String status,
+            @NotEmpty @RequestParam String dueDate,
+            @RequestParam @NotNull @ValidEnum(enumClass = Priority.class) String priority,
             RedirectAttributes redirectAttributes) {
 
         try {
-            Status taskStatus = Status.valueOf(status);
-            taskService.updateTask(id, title, description, taskStatus, dueDate);
+            taskService.updateTask(id, title, description, Status.valueOf(status), dueDate, Priority.valueOf(priority));
         } catch (InvalidDateException e) {
             redirectAttributes.addFlashAttribute("error", "Invalid date format");
             return "redirect:/tasks";

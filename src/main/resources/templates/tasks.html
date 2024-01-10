@@ -21,17 +21,24 @@
         <input type="text" name="title" placeholder="Enter task title" required>
         <input type="date" name="dueDate" placeholder="Enter task due date" required>
         <input type="text" name="description" placeholder="Enter task description" required>
+        <select name="priority" required>
+            <option value="LOW">Low</option>
+            <option value="NORMAL" selected>Normal</option>
+            <option value="HIGH">High</option>
+        </select>
         <button type="submit">Add Task</button>
     </form>
 
 
-    <form action="/tasks" method="get">
-        <select name="status" onchange="this.form.submit()">
+    <form id="filter-form" action="/tasks" method="get">
+        <select id="status-select" name="status" onchange="submitForm()">
             <option value="">All</option>
             <option value="OPEN">Open</option>
             <option value="IN_PROGRESS">Pending</option>
             <option value="DONE">Done</option>
         </select>
+        <input type="checkbox" id="sorted" name="sorted" value="true" onchange="submitForm()">
+        <label for="sorted">Sort by priority</label>
     </form>
 
     <div id="popup" class="popup">
@@ -40,6 +47,11 @@
             <input type="text" name="title" placeholder="Enter task title" required>
             <input type="date" name="dueDate" placeholder="Enter task due date" required>
             <input type="text" name="description" placeholder="Enter task description" required>
+            <select name="priority" required>
+                <option value="LOW">Low</option>
+                <option value="NORMAL" selected>Normal</option>
+                <option value="HIGH">High</option>
+            </select>
             <select name="status" required>
                 <option value="OPEN">Open</option>
                 <option value="IN_PROGRESS">In Progress</option>
@@ -54,22 +66,25 @@
     <thead>
         <tr>
             <th>Status</th>
+            <th>Priority</th>
             <th>Due Date</th>
             <th>Description</th>
             <th>Title</th>
             <th>Actions</th>
         </tr>
     </thead>
+
     <table class="task-list">
         <tbody>
             <tr th:each="task : ${tasks}">
                 <td th:text="${task.status}"></td>
+                <td th:text="${task.priority}"></td>
                 <td th:text="${#dates.format(task.dueDate, 'yyyy-MM-dd')}"></td>
                 <td th:text="${task.description}"></td>
                 <td th:text="${task.title}"></td>
                 <td>
                     <a href="#"
-                        th:attr="data-title=${task.title},data-dueDate=${#dates.format(task.dueDate, 'yyyy-MM-dd')},data-description=${task.description},data-id=${task.id},data-status=${task.status}"
+                        th:attr="data-title=${task.title},data-dueDate=${#dates.format(task.dueDate, 'yyyy-MM-dd')},data-description=${task.description},data-id=${task.id},data-status=${task.status},data-priority=${task.priority}"
                         onclick="showPopup(event)">Edit</a>
                     <form th:action="@{/tasks/{id}(id=${task.id})}" method="post">
                         <input type="hidden" name="_method" value="DELETE">
