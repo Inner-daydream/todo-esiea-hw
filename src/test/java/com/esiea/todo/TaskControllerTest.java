@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.esiea.todo.tasks.InvalidDateException;
+import com.esiea.todo.tasks.Priority;
 import com.esiea.todo.tasks.Status;
 import com.esiea.todo.tasks.Task;
 import com.esiea.todo.tasks.TaskNotFoundException;
@@ -53,7 +54,7 @@ public class TaskControllerTest {
 
         @Test
         public void testGetTasks() throws Exception {
-                Task task = new Task("title", "description", new Date());
+                Task task = new Task("title", "description", new Date(), Priority.LOW);
                 Iterable<Task> tasks = Collections.singletonList(task);
                 when(taskService.getAllTasks()).thenReturn(tasks);
 
@@ -69,18 +70,20 @@ public class TaskControllerTest {
                 String title = "title";
                 String description = "description";
                 String dueDate = "2022-12-31";
-                Task task = new Task(title, description, new Date());
-                when(taskService.createTask(anyString(), anyString(), anyString())).thenReturn(task);
+                Task task = new Task(title, description, new Date(), Priority.LOW);
+                when(taskService.createTask(anyString(), anyString(), anyString(), any(Priority.class)))
+                                .thenReturn(task);
 
                 mockMvc.perform(post("/tasks")
                                 .param("title", title)
                                 .param("description", description)
-                                .param("dueDate", dueDate))
+                                .param("dueDate", dueDate)
+                                .param("priority", "HIGH"))
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(redirectedUrl("/tasks"));
 
                 verify(taskService, times(1)).createTask(eq(title), eq(description),
-                                eq(dueDate));
+                                eq(dueDate), eq(Priority.HIGH));
         }
 
         @Test
@@ -89,8 +92,9 @@ public class TaskControllerTest {
                 String title = "title";
                 String description = "description";
                 String dueDate = "2022-12-31";
-                Task task = new Task(title, description, new Date());
-                when(taskService.updateTask(any(Long.class), anyString(), anyString(), any(Status.class), anyString()))
+                Task task = new Task(title, description, new Date(), Priority.LOW);
+                when(taskService.updateTask(any(Long.class), anyString(), anyString(), any(Status.class), anyString(),
+                                any(Priority.class)))
                                 .thenReturn(task);
 
                 mockMvc.perform(put("/tasks")
@@ -98,12 +102,13 @@ public class TaskControllerTest {
                                 .param("title", title)
                                 .param("description", description)
                                 .param("status", "IN_PROGRESS")
-                                .param("dueDate", dueDate))
+                                .param("dueDate", dueDate)
+                                .param("priority", "HIGH"))
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(redirectedUrl("/tasks"));
 
                 verify(taskService, times(1)).updateTask(eq(id), eq(title), eq(description), eq(Status.IN_PROGRESS),
-                                eq(dueDate));
+                                eq(dueDate), eq(Priority.HIGH));
         }
 
         @Test
@@ -121,13 +126,14 @@ public class TaskControllerTest {
                 String title = "title";
                 String description = "description";
                 String dueDate = "2022/000-31";
-                when(taskService.createTask(anyString(), anyString(), anyString()))
+                when(taskService.createTask(anyString(), anyString(), anyString(), any(Priority.class)))
                                 .thenThrow(new InvalidDateException(dueDate));
 
                 mockMvc.perform(post("/tasks")
                                 .param("title", title)
                                 .param("description", description)
-                                .param("dueDate", dueDate))
+                                .param("dueDate", dueDate)
+                                .param("priority", "HIGH"))
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(redirectedUrl("/tasks"))
                                 .andExpect(flash().attributeExists("error"));
@@ -140,7 +146,8 @@ public class TaskControllerTest {
                 String title = "title";
                 String description = "description";
                 String dueDate = "2022/000-31";
-                when(taskService.updateTask(any(Long.class), anyString(), anyString(), any(Status.class), anyString()))
+                when(taskService.updateTask(any(Long.class), anyString(), anyString(), any(Status.class), anyString(),
+                                any(Priority.class)))
                                 .thenThrow(new InvalidDateException(dueDate));
 
                 mockMvc.perform(put("/tasks")
@@ -148,7 +155,8 @@ public class TaskControllerTest {
                                 .param("title", title)
                                 .param("description", description)
                                 .param("status", Status.IN_PROGRESS.toString())
-                                .param("dueDate", dueDate))
+                                .param("dueDate", dueDate)
+                                .param("priority", "HIGH"))
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(redirectedUrl("/tasks"))
                                 .andExpect(flash().attributeExists("error"));
@@ -159,7 +167,8 @@ public class TaskControllerTest {
                 mockMvc.perform(post("/tasks")
                                 .param("title", "")
                                 .param("description", "zz")
-                                .param("dueDate", "2020-12-31"))
+                                .param("dueDate", "2020-12-31")
+                                .param("priority", "HIGH"))
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(redirectedUrl("/tasks"))
                                 .andExpect(flash().attributeExists("error"));
@@ -169,7 +178,8 @@ public class TaskControllerTest {
                                 .param("title", "ee")
                                 .param("description", "aa")
                                 .param("status", "")
-                                .param("dueDate", "2020-12-31"))
+                                .param("dueDate", "2020-12-31")
+                                .param("priority", "HIGH"))
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(redirectedUrl("/tasks"))
                                 .andExpect(flash().attributeExists("error"));
@@ -179,7 +189,8 @@ public class TaskControllerTest {
                                 .param("title", "ee")
                                 .param("description", "aa")
                                 .param("status", "ee")
-                                .param("dueDate", ""))
+                                .param("dueDate", "")
+                                .param("priority", "HIGH"))
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(redirectedUrl("/tasks"))
                                 .andExpect(flash().attributeExists("error"));
@@ -189,7 +200,8 @@ public class TaskControllerTest {
                                 .param("title", "ee")
                                 .param("description", "")
                                 .param("status", "ee")
-                                .param("dueDate", "2020-12-31"))
+                                .param("dueDate", "2020-12-31")
+                                .param("priority", "HIGH"))
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(redirectedUrl("/tasks"))
                                 .andExpect(flash().attributeExists("error"));
@@ -199,7 +211,8 @@ public class TaskControllerTest {
                                 .param("title", "Hello")
                                 .param("description", "aa")
                                 .param("status", "HANDS IN THE AIR")
-                                .param("dueDate", "2020-12-31"))
+                                .param("dueDate", "2020-12-31")
+                                .param("priority", "HIGH"))
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(redirectedUrl("/tasks"))
                                 .andExpect(flash().attributeExists("error"));
@@ -222,7 +235,8 @@ public class TaskControllerTest {
                 String title = "title";
                 String description = "description";
                 String dueDate = "2022-12-31";
-                when(taskService.updateTask(any(Long.class), anyString(), anyString(), any(Status.class), anyString()))
+                when(taskService.updateTask(any(Long.class), anyString(), anyString(), any(Status.class), anyString(),
+                                any(Priority.class)))
                                 .thenThrow(new TaskNotFoundException(id));
 
                 mockMvc.perform(put("/tasks")
@@ -230,7 +244,8 @@ public class TaskControllerTest {
                                 .param("title", title)
                                 .param("description", description)
                                 .param("status", Status.IN_PROGRESS.toString())
-                                .param("dueDate", dueDate))
+                                .param("dueDate", dueDate)
+                                .param("priority", "HIGH"))
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(redirectedUrl("/tasks"))
                                 .andExpect(flash().attributeExists("error"));

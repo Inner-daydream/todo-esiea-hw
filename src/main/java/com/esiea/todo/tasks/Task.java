@@ -16,15 +16,25 @@ public class Task {
     private String description;
     private Status status;
     private Date dueDate;
+    private Priority priority;
 
     protected Task() {
     }
 
-    public Task(String title, String description, Date dueDate) {
+    public Task(String title, String description, Date dueDate, Priority priority) {
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
         this.status = Status.OPEN;
+        this.priority = priority;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
     }
 
     public Long getId() {

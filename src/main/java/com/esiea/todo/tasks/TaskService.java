@@ -26,9 +26,9 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
-    public Task createTask(String title, String description, String dueDate) {
+    public Task createTask(String title, String description, String dueDate, Priority priority) {
         Date parsedDate = convertDate(dueDate);
-        Task task = new Task(title, description, parsedDate);
+        Task task = new Task(title, description, parsedDate, priority);
         return taskRepository.save(task);
     }
 
@@ -40,7 +40,8 @@ public class TaskService {
         return taskRepository.findAll();
     }
 
-    public Task updateTask(Long id, String title, String description, Status status, String dueDate) {
+    public Task updateTask(Long id, String title, String description, Status status, String dueDate,
+            Priority priority) {
         Date parsedDate = convertDate(dueDate);
         Task taskToUpdate = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
@@ -49,6 +50,7 @@ public class TaskService {
         taskToUpdate.setDescription(description);
         taskToUpdate.setStatus(status);
         taskToUpdate.setDueDate(parsedDate);
+        taskToUpdate.setPriority(priority);
         return taskRepository.save(taskToUpdate);
     }
 
@@ -56,8 +58,16 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
+    public Iterable<Task> getAllTasksSortedByPriorityDesc() {
+        return taskRepository.findAllByOrderByPriorityDesc();
+    }
+
     public Iterable<Task> getTasksByStatus(Status status) {
         return taskRepository.findByStatus(status);
+    }
+
+    public Iterable<Task> getTasksByStatusAndPriorityDesc(Status status) {
+        return taskRepository.findByStatusOrderByPriorityDesc(status);
     }
 
 }
