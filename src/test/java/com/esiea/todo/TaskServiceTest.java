@@ -159,4 +159,28 @@ public class TaskServiceTest {
                 date, Priority.NORMAL));
 
     }
+
+    @Test
+    public void testGetTasksByStatusAndPriorityDesc() {
+        Task task1 = new Task("title1", "description1", new Date(), Priority.HIGH);
+        Task task2 = new Task("title2", "description2", new Date(), Priority.NORMAL);
+        when(taskRepository.findByStatusOrderByPriorityDesc(Status.OPEN)).thenReturn(Arrays.asList(task1, task2));
+
+        Iterable<Task> result = taskService.getTasksByStatusAndPriorityDesc(Status.OPEN);
+
+        assertNotNull(result);
+        assertTrue(result.iterator().hasNext());
+    }
+
+    @Test
+    public void testGetAllTasksSortedByPriorityDesc() {
+        Task task1 = new Task("title1", "description1", new Date(), Priority.HIGH);
+        Task task2 = new Task("title2", "description2", new Date(), Priority.NORMAL);
+        when(taskRepository.findAllByOrderByPriorityDesc()).thenReturn(Arrays.asList(task1, task2));
+
+        Iterable<Task> result = taskService.getAllTasksSortedByPriorityDesc();
+
+        assertNotNull(result);
+        assertTrue(result.iterator().hasNext());
+    }
 }

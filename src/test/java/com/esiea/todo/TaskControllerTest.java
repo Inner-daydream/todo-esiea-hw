@@ -62,7 +62,8 @@ public class TaskControllerTest {
                                 .andExpect(status().isOk())
                                 .andExpect(view().name("tasks"))
                                 .andExpect(model().attributeExists("tasks"))
-                                .andExpect(model().attribute("tasks", tasks));
+                                .andExpect(model().attribute("tasks", tasks))
+                                .andExpect(model().attributeDoesNotExist("error"));
         }
 
         @Test
@@ -249,5 +250,47 @@ public class TaskControllerTest {
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(redirectedUrl("/tasks"))
                                 .andExpect(flash().attributeExists("error"));
+        }
+
+        @Test
+        void testGetTasksByStatus() throws Exception {
+                Task task1 = new Task("title1", "description1", new Date(), Priority.HIGH);
+                Iterable<Task> tasks = Collections.singletonList(task1);
+                when(taskService.getTasksByStatus(Status.OPEN)).thenReturn(tasks);
+
+                mockMvc.perform(get("/tasks").param("status", "OPEN"))
+                                .andExpect(status().isOk())
+                                .andExpect(view().name("tasks"))
+                                .andExpect(model().attributeExists("tasks"))
+                                .andExpect(model().attribute("tasks", tasks))
+                                .andExpect(model().attributeDoesNotExist("error"));
+        }
+
+        @Test
+        void testGetSortedTasks() throws Exception {
+                Task task1 = new Task("title1", "description1", new Date(), Priority.HIGH);
+                Iterable<Task> tasks = Collections.singletonList(task1);
+                when(taskService.getAllTasksSortedByPriorityDesc()).thenReturn(tasks);
+
+                mockMvc.perform(get("/tasks").param("sorted", "true"))
+                                .andExpect(status().isOk())
+                                .andExpect(view().name("tasks"))
+                                .andExpect(model().attributeExists("tasks"))
+                                .andExpect(model().attribute("tasks", tasks))
+                                .andExpect(model().attributeDoesNotExist("error"));
+        }
+
+        @Test
+        void testGetSortedTaskByStatus() throws Exception {
+                Task task1 = new Task("title1", "description1", new Date(), Priority.HIGH);
+                Iterable<Task> tasks = Collections.singletonList(task1);
+                when(taskService.getTasksByStatusAndPriorityDesc(Status.OPEN)).thenReturn(tasks);
+
+                mockMvc.perform(get("/tasks").param("status", "OPEN").param("sorted", "true"))
+                                .andExpect(status().isOk())
+                                .andExpect(view().name("tasks"))
+                                .andExpect(model().attributeExists("tasks"))
+                                .andExpect(model().attribute("tasks", tasks))
+                                .andExpect(model().attributeDoesNotExist("error"));
         }
 }
