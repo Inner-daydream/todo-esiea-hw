@@ -25,6 +25,15 @@
     </form>
 
 
+    <form action="/tasks" method="get">
+        <select name="status" onchange="this.form.submit()">
+            <option value="">All</option>
+            <option value="OPEN">Open</option>
+            <option value="IN_PROGRESS">Pending</option>
+            <option value="DONE">Done</option>
+        </select>
+    </form>
+
     <div id="popup" class="popup">
         <form th:action="@{/tasks}" method="post">
             <input type="hidden" name="_method" value="PUT">

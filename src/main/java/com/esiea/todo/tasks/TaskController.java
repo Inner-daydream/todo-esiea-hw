@@ -42,8 +42,15 @@ public class TaskController {
     }
 
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
-    public String tasks(Model model) {
-        Iterable<Task> tasks = taskService.getAllTasks();
+    public String tasks(Model model, @RequestParam(required = false) @ValidStatus String status) {
+        Iterable<Task> tasks;
+
+        if (status != null) {
+            Status taskStatus = Status.valueOf(status);
+            tasks = taskService.getTasksByStatus(taskStatus);
+        } else {
+            tasks = taskService.getAllTasks();
+        }
         model.addAttribute("tasks", tasks);
         return "tasks";
     }
@@ -65,7 +72,7 @@ public class TaskController {
     @RequestMapping(value = "/tasks", method = RequestMethod.PUT)
     public String editTask(@RequestParam @NotNull Long id, @RequestParam @NotEmpty String title,
             @RequestParam @NotEmpty String description,
-            @RequestParam @ValidStatus String status, @NotEmpty @RequestParam String dueDate,
+            @RequestParam @NotNull @ValidStatus String status, @NotEmpty @RequestParam String dueDate,
             RedirectAttributes redirectAttributes) {
 
         try {

@@ -7,6 +7,10 @@ public class StatusValidator implements ConstraintValidator<ValidStatus, String>
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
+
+        if (value == null) {
+            return true;
+        }
         if (value.isEmpty()) {
             return false;
         }
